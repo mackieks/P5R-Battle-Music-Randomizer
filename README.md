@@ -1,7 +1,7 @@
 # Persona 5 Royal Battle Music Randomizer
 <img src="preview.gif">
 
-[Download the Reloaded II package on GameBanana!](https://gamebanana.com/mods/add?gameid=16951)
+[Download the Reloaded II package on GameBanana!](https://gamebanana.com/mods/412327)
 
 ## Description:
 Battle and victory theme randomizer, in the spirit of the RPCS3 random BGM patch for vanilla P5. The mod adds shuffled DLC tracks (and a few extra songs from P3D/P5D) to the Take Over, Last Surprise, and Triumph tracklists. Encounters with special battle music (minibosses, bosses) are unaffected.
