@@ -1,0 +1,5 @@
+.vs/
+obj/
+Publish/
+*.v2
+Publish.ps1
