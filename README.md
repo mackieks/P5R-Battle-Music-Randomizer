@@ -1,12 +1,44 @@
 # Persona 5 Royal Battle Music Randomizer
+<img src="preview.gif">
 
-This mod hijacks BGM calls for Take Over, Last Surprise, and Triumph, and redirects them to new cue IDs (60962 for Take Over & Last Surprise, 60963 for Triumph). The new cue IDs contain multiple tracks and are set to 'shuffle' which results in randomized battle and victory themes during gameplay. Only normal battles will have their battle theme randomized, but all battles should have randomized victory themes.
+## Description:
+Battle and victory theme randomizer, in the spirit of the RPCS3 random BGM patch for vanilla P5. The mod adds shuffled DLC tracks (and a few extra songs from P3D/P5D) to the Take Over, Last Surprise, and Triumph tracklists. Encounters with special battle music (minibosses, bosses) shouldn't be affected.
 
-Steam-only; untested on Gamepass.
+*Requires No Holdup Music mod to work properly! Go install that first!*
 
-## Installation
-Use the Reloaded II downloader, or drag-and-drop this mod into your Reloaded II /mods/ folder.
+## Technical Details:
+For the previous version of this mod I stuffed the extra tracks into new cues added to BGM.acb using ACE, which caused lots of weird glitches. This new version actually hijacks the DLC costume ACBs. The costume music flag is hardcoded to always be 01 and BGM_01 has been replaced with a new ACB made from scratch in Cri Atom Craft. 
 
+## Adding Tracks:
+Right now, adding or removing tracks requires using Atom Craft (or ACE, but it seems buggy) and recompiling the ACB/AWB. If you do this, make sure the cues remain set to Shuffle, otherwise the randomization won't work. 
 
-Special thanks:
-- SecreC and Powercore2000 for sharing their source code
+## Installation:
+Use the 1-click install, or download the archive manually and unzip it into your mods folder.
+
+## Battle tracklist:
+- Take Over (P5R)
+- Last Surprise (P5)
+- Mass Destruction  (P3)
+- Time to Make History (P4G)
+- A Lone Prayer (Persona 1)
+- Normal Battle (Persona 2)
+- Obelisk (Catherine)
+- Reach Out to The Truth (P4D)
+- The Ultimate (P4AU)
+- The Whims of Fate (Yukihiro Fukutomi Remix)
+- Last Surprise (Taku Takahashi Remix)
+- Life Will Change (ATLUS Meguro Remix)
+- Rivers In the Desert (Mito Remix)
+## Victory tracklist:
+- Triumph 
+- After the Battle 
+- Period 
+- Dream of a Butterfly 
+- Battle Results (Persona 2) 
+- Old Enemy (SMT If...)
+- Period (P4D Version) 
+- The Ultimate (P4AU) 
+- Victory/Triumph (P5D Version)
+- After the Battle (P3D Version)
+
+*Special thanks to Powercore2000 for sharing source code, offering advice, and helping track down the BGM ACB variables!*
