@@ -96,18 +96,15 @@ namespace BattleMusicRandomizer
 
         private static void StubBGMSwap(Memory memory, ILogger logger, long baseAddress, IStartupScanner startupScanner)
         {
-            startupScanner.AddMainModuleScan("C7 08 83 FE 11 72 D9 EB 0C 48 63 C6 49 8D 3C C6", delegate (PatternScanResult result)
+            startupScanner.AddMainModuleScan("C7 08 83 FE 11 72 D9 EB 0C", delegate (PatternScanResult result)
             {
                 long num = result.Offset + baseAddress;
                 if (result.Found)
                 {
                     logger.Write($"BGM ACB index pointer found. Address is {num - baseAddress}.\n");
                     memory.SafeWrite(num, 0xEBD97211FE8308C7, marshal: false);
-                    memory.SafeWrite(num + 8, 0x0141ADC0F8BF4800, marshal: false);
-                    memory.SafeWrite(num + 16, 0X9090909090000000, marshal: false);
-                    memory.SafeWrite(num + 24, 0xAC360D8B4807B70F, marshal: false);
-                    memory.SafeWrite(num + 32, 0xED37B538158BED37, marshal: false);
-                    memory.SafeWrite(num + 40, 0x010D840FD0390189, marshal: false);
+                    memory.SafeWrite(num + 8, 0x0141B3A4D8BF4800, marshal: false);
+                    memory.SafeWrite(num + 16, 0x9090909090000000, marshal: false);
                     logger.Write($"Wrote BGM ACB change stub to memory.\n");
                 }
                 else
