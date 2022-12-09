@@ -44,11 +44,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Reloaded.Hooks" Version="4.2.1" />
+    <PackageReference Include="Reloaded.Hooks.Definitions" Version="1.14.0" />
+    <PackageReference Include="Reloaded.Imgui.Hook" Version="4.0.1" />
+    <PackageReference Include="Reloaded.Imgui.Hook.Direct3D11" Version="1.0.1" />
     <PackageReference Include="Reloaded.Memory" Version="8.0.1" />
     <PackageReference Include="Reloaded.Memory.Sigscan" Version="3.1.6" />
     <PackageReference Include="Reloaded.Memory.SigScan.ReloadedII.Interfaces" Version="1.2.0" />
     <PackageReference Include="Reloaded.Mod.Interfaces" Version="2.3.0" ExcludeAssets="runtime" />
     <PackageReference Include="Reloaded.SharedLib.Hooks" Version="1.9.0" />
+    <PackageReference Include="sharpconfig" Version="3.2.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <NativeLibs Remove="Macros.cs" />
   </ItemGroup>
 
 </Project>
