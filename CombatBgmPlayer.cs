@@ -29,21 +29,28 @@ using DearImguiSharp;
 using SharpConfig;
 using System.Reflection;
 using Reloaded.Hooks.Definitions.X64;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace BattleMusicRandomizer
 {
     public class BGMRandomizer
     {
         //[Function]
-        public delegate void ambushShuffle();
+        public delegate int ambushShuffle();
 
         //private IReloadedHooks _hooks;
         static bool[] ambushTracks = new bool[13];
         static bool[] battleTracks = new bool[13];
         static bool[] resultsTracks = new bool[13];
+        
         static bool showWindow = true;
         static bool showAmbushConfig = true;
-        static int ambushCueID = 0;
+        static volatile int ambushCueID = 0;
+
+        IAsmHook addNoOriginalHook;
+        IReverseWrapper<ambushShuffle> ambushShuffleWrap;
 
         public BGMRandomizer(IReloadedHooks hooks, ILogger logger, IModLoader modLoader)
         {
@@ -66,6 +73,7 @@ namespace BattleMusicRandomizer
                 // SetBattleTheme(memory, logger, baseAddress, startupScanner);
                 // SetResultsTheme(memory, logger, baseAddress, startupScanner);
                 StubBGMSwap(memory, logger, baseAddress, startupScanner);
+
             }
             else {
 
@@ -177,11 +185,35 @@ namespace BattleMusicRandomizer
         public void Resume() => ImguiHook.Enable();
         public void Unload() => ImguiHook.Destroy();
 
+        //[Function(Reloaded.Hooks.Definitions.X64.CallingConventions.SystemV)]
+        public delegate int FastcallExample();
+
+        /* Fields */
+        public static IReverseWrapper<FastcallExample> _reverseFunctionWrapper;
+        public static FastcallExample _functionWrapper;
+
+
+        /* Function Implementation */
+
+        /// <summary>
+        /// When called through the address in reverseFunctionWrapper.Pointer,
+        /// this function is now a "fastcall" function.
+        /// </summary>
+        /// <param name="a">This number is passed via ECX register!</param>
+        /// <param name="b">This number is passed via EDX register!</param>
+        /// <param name="c">This number is on the stack.</param>
+        public static int CSharpFastcallFunction()
+        {
+            return (962);
+        }
+
         private static void SetAmbushTheme(Memory memory, ILogger logger, long baseAddress, IStartupScanner startupScanner, IReloadedHooks hooks)
         {
             startupScanner.AddMainModuleScan("BA 8B 03 00 00 83 F8 01", delegate (PatternScanResult result)
             {
                 long num = result.Offset + baseAddress;
+                long num2 = result.Offset + baseAddress + 8;
+                Int32 num3 = (Int32)num2;
                 logger.Write($"Ambush theme address is {num - baseAddress}. Found = {result.Found}\n");
                 if (result.Found)
                 {
@@ -189,19 +221,29 @@ namespace BattleMusicRandomizer
                     //logger.Write($"Wrote new cue ID to memory.\n");
 
                     IAsmHook addNoOriginalHook;
-                    IReverseWrapper<ambushShuffle> ambushShuffleWrap;
+                    //IReverseWrapper ambushShuffleWrap = new IReverseWrapper<ambushShuffle>;
+                    //GC.KeepAlive(ambushShuffleWrap);
+
+                    _reverseFunctionWrapper = hooks.CreateReverseWrapper<FastcallExample>(CSharpFastcallFunction);
+
+                    // To prove our "C# fastcall" function works, let's just call it like a native function.
+                                  
 
                     string[] addFunction =
                     {
                         $"{Macros._use32}",
 
-                        $"{hooks.Utilities.GetAbsoluteCallMnemonics(shuffleAmbushTheme, out ambushShuffleWrap)}",
 
-                        $"mov edx, 340",  
+                        $"{hooks.Utilities.GetAbsoluteCallMnemonics(CSharpFastcallFunction, out _reverseFunctionWrapper)}",
+
+
+                        $"mov edx, 962",  
                         $"cmp eax, 1",
+                        //$"ret"
                     };
 
                     addNoOriginalHook = hooks.CreateAsmHook(addFunction, num, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+
                 }
                 else
                 {
@@ -263,42 +305,8 @@ namespace BattleMusicRandomizer
                 {
                     logger.Write($"Couldn't find BGM ACB index pointer!\n");
                 }
-            });            
+            });   
         }
-
-        
-
-        private static void shuffleAmbushTheme()
-        {
-            ambushCueID = 340;
-        }
-
-        
-
-        //private void func(IReloadedHooks hooks)
-        //{
-        //    int wordSize = IntPtr.Size;
-
-
-        //    string[] addFunction =
-        //    {
-        //        $"use32",
-
-        //        // Backup registers meant to be saved by caller. 
-        //        // Not always necessary but good practice to do so!
-        //        // $"{hooks.Utilities.PushCdeclCallerSavedRegisters()}",
-
-        //        //  $"{hooks.Utilities.GetAbsoluteCallMnemonics(shuffleBattleTheme, out _)}",
-
-        //        // Restore backed up registers.
-        //        // $"{hooks.Utilities.PopCdeclCallerSavedRegisters()}",
-        //        $"mov {Macros._edx}, 502",
-        //        $"cmp {Macros._eax}, 1",
-        //        $"ret"
-        //    };
-
-        //    _addNoOriginalHook = new AsmHook(addFunction, 0, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
-        //}
 
     }
 }
