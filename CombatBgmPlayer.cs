@@ -37,9 +37,7 @@ namespace BattleMusicRandomizer
 {
     public class BGMRandomizer
     {
-        //[Function]
-        public delegate int ambushShuffle();
-
+           
         //private IReloadedHooks _hooks;
         static bool[] ambushTracks = new bool[13];
         static bool[] battleTracks = new bool[13];
@@ -49,8 +47,9 @@ namespace BattleMusicRandomizer
         static bool showAmbushConfig = true;
         static volatile int ambushCueID = 0;
 
-        IAsmHook addNoOriginalHook;
-        IReverseWrapper<ambushShuffle> ambushShuffleWrap;
+        private IReverseWrapper<ShouldGiveBonusDelegate> _shouldGiveBonusReverseWrapper;
+
+        private IAsmHook _shouldGiveBonusHook;
 
         public BGMRandomizer(IReloadedHooks hooks, ILogger logger, IModLoader modLoader)
         {
@@ -92,8 +91,8 @@ namespace BattleMusicRandomizer
             SDK.Init(hooks);
             await ImguiHook.Create(RenderTestWindow, new ImguiHookOptions()
             {
-                EnableViewports = true,
-                IgnoreWindowUnactivate = true,
+                EnableViewports = false,
+                IgnoreWindowUnactivate = false,
                 Implementations = new List<IImguiHook>()
                 {
                     new ImguiHookDx11()
@@ -185,29 +184,8 @@ namespace BattleMusicRandomizer
         public void Resume() => ImguiHook.Enable();
         public void Unload() => ImguiHook.Destroy();
 
-        //[Function(Reloaded.Hooks.Definitions.X64.CallingConventions.SystemV)]
-        public delegate int FastcallExample();
 
-        /* Fields */
-        public static IReverseWrapper<FastcallExample> _reverseFunctionWrapper;
-        public static FastcallExample _functionWrapper;
-
-
-        /* Function Implementation */
-
-        /// <summary>
-        /// When called through the address in reverseFunctionWrapper.Pointer,
-        /// this function is now a "fastcall" function.
-        /// </summary>
-        /// <param name="a">This number is passed via ECX register!</param>
-        /// <param name="b">This number is passed via EDX register!</param>
-        /// <param name="c">This number is on the stack.</param>
-        public static int CSharpFastcallFunction()
-        {
-            return (962);
-        }
-
-        private static void SetAmbushTheme(Memory memory, ILogger logger, long baseAddress, IStartupScanner startupScanner, IReloadedHooks hooks)
+        public static void SetAmbushTheme(Memory memory, ILogger logger, long baseAddress, IStartupScanner startupScanner, IReloadedHooks hooks)
         {
             startupScanner.AddMainModuleScan("BA 8B 03 00 00 83 F8 01", delegate (PatternScanResult result)
             {
@@ -217,32 +195,21 @@ namespace BattleMusicRandomizer
                 logger.Write($"Ambush theme address is {num - baseAddress}. Found = {result.Found}\n");
                 if (result.Found)
                 {
-                    //memory.SafeWrite(num + 1, (short)962, marshal: false);
-                    //logger.Write($"Wrote new cue ID to memory.\n");
 
-                    IAsmHook addNoOriginalHook;
-                    //IReverseWrapper ambushShuffleWrap = new IReverseWrapper<ambushShuffle>;
-                    //GC.KeepAlive(ambushShuffleWrap);
-
-                    _reverseFunctionWrapper = hooks.CreateReverseWrapper<FastcallExample>(CSharpFastcallFunction);
-
-                    // To prove our "C# fastcall" function works, let's just call it like a native function.
-                                  
-
-                    string[] addFunction =
+                    string[] function =
                     {
-                        $"{Macros._use32}",
-
-
-                        $"{hooks.Utilities.GetAbsoluteCallMnemonics(CSharpFastcallFunction, out _reverseFunctionWrapper)}",
-
-
-                        $"mov edx, 962",  
-                        $"cmp eax, 1",
-                        //$"ret"
+                        "use64",
+                        "jnz endHook", // If they're already going to get the bonus we don't want to change that
+                        $"push rax\npush rcx\npush r8\npush r10",
+                        "sub rsp, 32",
+                        $"{hooks.Utilities.GetAbsoluteCallMnemonics(ShouldGiveBonus, out _shouldGiveBonusReverseWrapper)}",
+                        "add rsp, 32",
+                        "cmp rax, 0",
+                        "pop r10\npop r8\npop rcx\npop rax",
+                        "label endHook"
                     };
+                    _shouldGiveBonusHook = hooks.CreateAsmHook(function, result.Offset).Activate();
 
-                    addNoOriginalHook = hooks.CreateAsmHook(addFunction, num, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
 
                 }
                 else
@@ -250,11 +217,19 @@ namespace BattleMusicRandomizer
                     logger.Write($"Oops! Couldn't find 'Take Over' BGM call!\n");
                 }
             });
+
+           
+
+        }
+
+        private bool ShouldGiveBonus()
+        {
+            return false;
         }
 
         private static void SetBattleTheme(Memory memory, ILogger logger, long baseAddress, IStartupScanner startupScanner)
         {
-            startupScanner.AddMainModuleScan("BA 2C 01 00 00 49 8B CF", delegate (PatternScanResult result)
+            startupScanner.AddMainModuleScan("BA 2C 01 00 00 49 8B CF E8", delegate (PatternScanResult result)
             {
                 long num = result.Offset + baseAddress;
                 logger.Write($"Battle theme address is {num - baseAddress}. Found = {result.Found}\n");
@@ -297,7 +272,7 @@ namespace BattleMusicRandomizer
                 {
                     logger.Write($"BGM ACB index pointer found. Address is {num - baseAddress}.\n");
                     memory.SafeWrite(num, 0xEBD97211FE8308C7, marshal: false);
-                    memory.SafeWrite(num + 8, 0x0141B3A4D8BF4800, marshal: false);
+                    memory.SafeWrite(num + 8, 0x0141B3A498BF4800, marshal: false);
                     memory.SafeWrite(num + 16, 0x9090909090000000, marshal: false);
                     logger.Write($"Wrote BGM ACB change stub to memory.\n");
                 }
@@ -307,6 +282,8 @@ namespace BattleMusicRandomizer
                 }
             });   
         }
+
+        
 
     }
 }
