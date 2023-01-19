@@ -2,7 +2,7 @@
   "ModId": "p5rpc.music.battlemusicrandomizer",
   "ModName": "Battle Music Randomizer",
   "ModAuthor": "YveltalGriffin",
-  "ModVersion": "1.0.1",
+  "ModVersion": "2.0.0",
   "ModDescription": "A mod that randomizes battle and victory themes during gameplay",
   "ModDll": "p5rpc.music.battlemusicrandomizer.dll",
   "ModIcon": "Preview.png",
@@ -10,6 +10,11 @@
   "ModR2RManagedDll64": "x64/p5rpc.music.battlemusicrandomizer.dll",
   "ModNativeDll32": "",
   "ModNativeDll64": "",
+  "Tags": [
+    "Music"
+  ],
+  "CanUnload": null,
+  "HasExports": null,
   "IsLibrary": false,
   "ReleaseMetadataFileName": "p5rpc.music.battlemusicrandomizer.ReleaseMetadata.json",
   "PluginData": {
@@ -26,8 +31,8 @@
         },
         "Reloaded.Memory.SigScan.ReloadedII": {
           "Config": {
-            "UserName": "Reloaded.Memory.SigScan",
-            "RepositoryName": "Reloaded-Project",
+            "UserName": "Reloaded-Project",
+            "RepositoryName": "Reloaded.Memory.SigScan",
             "UseReleaseTag": false,
             "AssetFileName": "Mod.zip"
           },
@@ -35,26 +40,70 @@
         },
         "reloaded.sharedlib.hooks": {
           "Config": {
-            "UserName": "Reloaded.SharedLib.Hooks.ReloadedII",
-            "RepositoryName": "Sewer56",
+            "UserName": "Sewer56",
+            "RepositoryName": "Reloaded.SharedLib.Hooks.ReloadedII",
             "UseReleaseTag": true,
             "AssetFileName": "reloaded.sharedlib.hooks.zip"
           },
           "ReleaseMetadataName": "Sewer56.Update.ReleaseMetadata.json"
+        },
+        "CriFs.V2.Hook.Awb": {
+          "Config": {
+            "UserName": "Sewer56",
+            "RepositoryName": "CriFs.V2.Hook.ReloadedII",
+            "UseReleaseTag": false,
+            "AssetFileName": "Mod.zip"
+          },
+          "ReleaseMetadataName": "CriFs.V2.Hook.Awb.ReleaseMetadata.json"
+        },
+        "crifs.v2.hook": {
+          "Config": {
+            "UserName": "Sewer56",
+            "RepositoryName": "CriFs.V2.Hook.ReloadedII",
+            "UseReleaseTag": false,
+            "AssetFileName": "Mod.zip"
+          },
+          "ReleaseMetadataName": "CriFs.V2.Hook.ReleaseMetadata.json"
+        },
+        "reloaded.universal.fileemulationframework.awb": {
+          "Config": {
+            "UserName": "Sewer56",
+            "RepositoryName": "FileEmulationFramework",
+            "UseReleaseTag": false,
+            "AssetFileName": "Mod.zip"
+          },
+          "ReleaseMetadataName": "AWB.Stream.Emulator.ReleaseMetadata.json"
+        },
+        "reloaded.universal.fileemulationframework": {
+          "Config": {
+            "UserName": "Sewer56",
+            "RepositoryName": "FileEmulationFramework",
+            "UseReleaseTag": false,
+            "AssetFileName": "Mod.zip"
+          },
+          "ReleaseMetadataName": "Reloaded.Universal.FileEmulationFramework.ReleaseMetadata.json"
         }
       }
     },
-    "GitHubRelease": {
-      "UserName": "mackieks",
-      "RepositoryName": "P5R-Battle-Music-Randomizer",
-      "UseReleaseTag": true,
-      "AssetFileName": "mod.zip"
+    "GameBanana": {
+      "ItemType": "Mod",
+      "ItemId": 412327
+    },
+    "GameBananaDependencies": {
+      "IdToConfigMap": {
+        "p5rpc.noholdupmusic": {
+          "Config": {
+            "ItemType": "Mod",
+            "ItemId": 408638
+          },
+          "ReleaseMetadataName": "p5rpc.noholdupmusic.ReleaseMetadata.json"
+        }
+      }
     }
   },
   "IsUniversalMod": false,
   "ModDependencies": [
     "p5rpc.modloader",
-    "p5rpc.noholdupmusic",
     "Reloaded.Memory.SigScan.ReloadedII",
     "reloaded.sharedlib.hooks"
   ],

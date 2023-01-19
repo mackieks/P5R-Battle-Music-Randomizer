@@ -118,7 +118,7 @@ public class Mod : ModBase // <= Do not Remove.
         _modConfig = context.ModConfig;
 
         _logger.Write($"BGM Randomizer v2.0.0 by YveltalGriffin\n", _logger.ColorPinkLight);
-        _logger.Write($"Loading p5rbgm.cfg...\n", _logger.ColorPinkLight);
+        _logger.Write($"Press Alt to open menu!\n", _logger.ColorPinkLight);
 
         string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         string cfgLocation = Path.Combine(assemblyFolder, "p5rbgm.cfg");
@@ -128,6 +128,8 @@ public class Mod : ModBase // <= Do not Remove.
         ambushTracks = section["ambushTracks"].BoolValueArray;
         battleTracks = section["battleTracks"].BoolValueArray;
         resultsTracks = section["resultsTracks"].BoolValueArray;
+
+        _logger.Write($"Loaded p5rbgm.cfg!\n", _logger.ColorPinkLight);
 
         Memory memory = Memory.Instance;
         using Process thisProcess = Process.GetCurrentProcess();
@@ -194,14 +196,14 @@ public class Mod : ModBase // <= Do not Remove.
 
         });
 
-        startupScanner.AddMainModuleScan("BA 54 01 00 00 48 8B CE", delegate (PatternScanResult result)
+        startupScanner.AddMainModuleScan("BA 54 01 00 00 48 8B CE E8 8B 23 FF FF", delegate (PatternScanResult result)
         {
 
             long num = result.Offset + baseAddress;
 
             if (result.Found)
             {
-                _logger.Write($"Found results theme code!\n", _logger.ColorPinkLight);
+                _logger.Write($"Found normal results theme code!\n", _logger.ColorPinkLight);
                 string[] function =
                 {
                     $"use64",
@@ -216,11 +218,42 @@ public class Mod : ModBase // <= Do not Remove.
                 };
                 _resultsBGMhook = _hooks.CreateAsmHook(function, num, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
 
-                _logger.Write($"Wrote results theme patch to memory!\n", _logger.ColorPinkLight);
+                _logger.Write($"Wrote normal results theme patch to memory!\n", _logger.ColorPinkLight);
             }
             else
             {
-                _logger.Write($"Couldn't find results theme address!\n", _logger.ColorPinkLight);
+                _logger.Write($"Couldn't find normal results theme address!\n", _logger.ColorPinkLight);
+            }
+
+        });
+
+        startupScanner.AddMainModuleScan("BA 54 01 00 00 48 8B CE E8 13 BE FE FF", delegate (PatternScanResult result)
+        {
+
+            long num = result.Offset + baseAddress;
+
+            if (result.Found)
+            {
+                _logger.Write($"Found hold-up results theme code!\n", _logger.ColorPinkLight);
+                string[] function =
+                {
+                    $"use64",
+                    $"push rax\npush rcx\npush r8\npush r10",
+                    $"sub rsp, 32",
+                    $"{_hooks.Utilities.GetAbsoluteCallMnemonics(resultsBGM, out _resultsBGMReverseWrapper)}",
+                    $"add rsp, 32",
+                    $"pop r10\npop r8\npop rcx\npop rax",
+                    $"mov r14, {num + 8}",
+                    $"mov rcx, rsi",
+                    $"jmp r14",
+                };
+                _resultsBGMhook = _hooks.CreateAsmHook(function, num, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+
+                _logger.Write($"Wrote hold-up results theme patch to memory!\n", _logger.ColorPinkLight);
+            }
+            else
+            {
+                _logger.Write($"Couldn't find hold-up results theme address!\n", _logger.ColorPinkLight);
             }
 
         });
