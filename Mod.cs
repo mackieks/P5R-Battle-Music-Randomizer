@@ -107,6 +107,9 @@ public class Mod : ModBase // <= Do not Remove.
 
     long ms = Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000);
 
+    long click_time = Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000);
+    private static bool tooltip_lockout = false;
+
     public Mod(ModContext context)
     {
 
@@ -473,6 +476,7 @@ public class Mod : ModBase // <= Do not Remove.
 
         var style = DearImguiSharp.ImGui.GetStyle();
         style.WindowRounding = 5.0f;
+        style.FrameRounding = 2.0f;
         var colors = style.Colors;
         colors[(int)DearImguiSharp.ImGuiCol.Text] = new ImVec4() { X = 255 / 255f, Y = 255 / 255f, Z = 255 / 255f, W = 221 / 255f };
         colors[(int)DearImguiSharp.ImGuiCol.TitleBgActive] = new ImVec4() { X = 150 / 255f, Y = 0f, Z = 0f, W = 221 / 255f };
@@ -517,9 +521,11 @@ public class Mod : ModBase // <= Do not Remove.
             {
                 DearImguiSharp.ImGui.Text("Enable the songs you'd like to hear\nand press Apply to save your changes");
                 DearImguiSharp.ImGui.SameLine(0,25);
-                if (DearImguiSharp.ImGui.Button("Apply", new ImVec2() { X = 60, Y = 20 }))
+                if (DearImguiSharp.ImGui.Button("Apply", new ImVec2() { X = 64, Y = 24 }))
                 {
                     tracksUpdated = true;
+                    click_time = Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000);
+
                     _logger.Write("Tracklist updated!\n", _logger.ColorPinkLight);
 
                     // Update ambush tracklist
@@ -638,6 +644,7 @@ public class Mod : ModBase // <= Do not Remove.
 
 
                     tracksUpdated = false;
+                    tooltip_lockout = false;
 
                     var config = new SharpConfig.Configuration();
                     string assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -647,6 +654,22 @@ public class Mod : ModBase // <= Do not Remove.
                     config["General"]["resultsTracks"].BoolValueArray = resultsTracks;
                     config.SaveToFile(cfgLocation);
                 }
+                if (DearImguiSharp.ImGui.IsItemHovered(0) && !tooltip_lockout)
+                {
+                    if ((Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000)) - click_time > 1500)
+                    {
+                        //DearImguiSharp.ImGui.SetTooltip("Click to update tracklist!");
+                    }
+                    else
+                    {
+                        DearImguiSharp.ImGui.PushStyleColorVec4((int)ImGuiCol.Text, new ImVec4() { X = 255 / 255f, Y = 255 / 255f, Z = 255 / 255f, W = 255 / 255f });
+                        DearImguiSharp.ImGui.SetTooltip("Tracklist Updated!");
+                        DearImguiSharp.ImGui.PopStyleColor(1);
+                    }
+                } else tooltip_lockout = true;
+                
+                    
+                                
 
                 if (DearImguiSharp.ImGui.CollapsingHeaderTreeNodeFlags("Ambush Themes", 0))
                 {
@@ -680,32 +703,32 @@ public class Mod : ModBase // <= Do not Remove.
                 }
                 if (DearImguiSharp.ImGui.CollapsingHeaderTreeNodeFlags("Battle Themes", 0))
                 {
-                    DearImguiSharp.ImGui.Checkbox("Take Over (P5R)", ref battleTracks[0]);
-                    DearImguiSharp.ImGui.Checkbox("Last Surprise (P5)", ref battleTracks[1]);
-                    DearImguiSharp.ImGui.Checkbox("Mass Destruction (P3)", ref battleTracks[2]);
-                    DearImguiSharp.ImGui.Checkbox("Time To Make History (P4G)", ref battleTracks[3]);
-                    DearImguiSharp.ImGui.Checkbox("A Lone Prayer (Persona)", ref battleTracks[4]);
-                    DearImguiSharp.ImGui.Checkbox("Normal Battle (P2)", ref battleTracks[5]);
-                    DearImguiSharp.ImGui.Checkbox("Obelisk (Catherine)", ref battleTracks[6]);
-                    DearImguiSharp.ImGui.Checkbox("Reach Out to the Truth (P4D)", ref battleTracks[7]);
-                    DearImguiSharp.ImGui.Checkbox("The Ultimate (P4AU)", ref battleTracks[8]);
-                    DearImguiSharp.ImGui.Checkbox("Invitation to Freedom (PQ2)", ref battleTracks[9]);
-                    DearImguiSharp.ImGui.Checkbox("Axe to Grind (P5S)", ref battleTracks[10]);
-                    DearImguiSharp.ImGui.Checkbox("The Whims of Fate (Yukihiro Fukutomi Remix) (P5D)", ref battleTracks[11]);
-                    DearImguiSharp.ImGui.Checkbox("Last Surprise (Taku Takahashi Remix) (P5D)", ref battleTracks[12]);
-                    DearImguiSharp.ImGui.Checkbox("Life Will Change Remix (ATLUS Meguro Remix) (P5D)", ref battleTracks[13]);
-                    DearImguiSharp.ImGui.Checkbox("Rivers in the Desert (Mito Remix) (P5D)", ref battleTracks[14]);
-                    DearImguiSharp.ImGui.Checkbox("What You Wish For (P5S)", ref battleTracks[15]);
-                    DearImguiSharp.ImGui.Checkbox("Groovy (P5D)", ref battleTracks[16]);
-                    DearImguiSharp.ImGui.Checkbox("Wiping All Out (P3P)", ref battleTracks[17]);
-                    DearImguiSharp.ImGui.Checkbox("Prison Labor (P5R)", ref battleTracks[18]);
-                    DearImguiSharp.ImGui.Checkbox("Last Surprise (P5S)", ref battleTracks[19]);
-                    DearImguiSharp.ImGui.Checkbox("Reach Out to the Truth (Mayonaka Arena) (P4AU)", ref battleTracks[20]);
-                    DearImguiSharp.ImGui.Checkbox("Last Surprise (Kirara Remix)", ref battleTracks[21]);
-                    DearImguiSharp.ImGui.Checkbox("Yo (Acid Jazz Ver.) (Catherine: Full Body)", ref battleTracks[22]);
-                    DearImguiSharp.ImGui.Checkbox("Old Enemy (SMT If...)", ref battleTracks[23]);
-                    DearImguiSharp.ImGui.Checkbox("Pull the Trigger (PQ2)", ref battleTracks[24]);
-                    DearImguiSharp.ImGui.Checkbox("Light Up the Fire in the Night (Dark Hour) (P3D)", ref battleTracks[25]);
+                    DearImguiSharp.ImGui.Checkbox("Take Over (P5R)##battle", ref battleTracks[0]);
+                    DearImguiSharp.ImGui.Checkbox("Last Surprise (P5)##battle", ref battleTracks[1]);
+                    DearImguiSharp.ImGui.Checkbox("Mass Destruction (P3)##battle", ref battleTracks[2]);
+                    DearImguiSharp.ImGui.Checkbox("Time To Make History (P4G)##battle", ref battleTracks[3]);
+                    DearImguiSharp.ImGui.Checkbox("A Lone Prayer (Persona)##battle", ref battleTracks[4]);
+                    DearImguiSharp.ImGui.Checkbox("Normal Battle (P2)##battle", ref battleTracks[5]);
+                    DearImguiSharp.ImGui.Checkbox("Obelisk (Catherine)##battle", ref battleTracks[6]);
+                    DearImguiSharp.ImGui.Checkbox("Reach Out to the Truth (P4D)##battle", ref battleTracks[7]);
+                    DearImguiSharp.ImGui.Checkbox("The Ultimate (P4AU)##battle", ref battleTracks[8]);
+                    DearImguiSharp.ImGui.Checkbox("Invitation to Freedom (PQ2)##battle", ref battleTracks[9]);
+                    DearImguiSharp.ImGui.Checkbox("Axe to Grind (P5S)##battle", ref battleTracks[10]);
+                    DearImguiSharp.ImGui.Checkbox("The Whims of Fate (Yukihiro Fukutomi Remix) (P5D)##battle", ref battleTracks[11]);
+                    DearImguiSharp.ImGui.Checkbox("Last Surprise (Taku Takahashi Remix) (P5D)##battle", ref battleTracks[12]);
+                    DearImguiSharp.ImGui.Checkbox("Life Will Change Remix (ATLUS Meguro Remix) (P5D)##battle", ref battleTracks[13]);
+                    DearImguiSharp.ImGui.Checkbox("Rivers in the Desert (Mito Remix) (P5D)##battle", ref battleTracks[14]);
+                    DearImguiSharp.ImGui.Checkbox("What You Wish For (P5S)##battle", ref battleTracks[15]);
+                    DearImguiSharp.ImGui.Checkbox("Groovy (P5D)##battle", ref battleTracks[16]);
+                    DearImguiSharp.ImGui.Checkbox("Wiping All Out (P3P)##battle", ref battleTracks[17]);
+                    DearImguiSharp.ImGui.Checkbox("Prison Labor (P5R)##battle", ref battleTracks[18]);
+                    DearImguiSharp.ImGui.Checkbox("Last Surprise (P5S)##battle", ref battleTracks[19]);
+                    DearImguiSharp.ImGui.Checkbox("Reach Out to the Truth (Mayonaka Arena) (P4AU)##battle", ref battleTracks[20]);
+                    DearImguiSharp.ImGui.Checkbox("Last Surprise (Kirara Remix)##battle", ref battleTracks[21]);
+                    DearImguiSharp.ImGui.Checkbox("Yo (Acid Jazz Ver.) (Catherine: Full Body)##battle", ref battleTracks[22]);
+                    DearImguiSharp.ImGui.Checkbox("Old Enemy (SMT If...)##battle", ref battleTracks[23]);
+                    DearImguiSharp.ImGui.Checkbox("Pull the Trigger (PQ2)##battle", ref battleTracks[24]);
+                    DearImguiSharp.ImGui.Checkbox("Light Up the Fire in the Night (Dark Hour) (P3D)##battle", ref battleTracks[25]);
                 }
                 if (DearImguiSharp.ImGui.CollapsingHeaderTreeNodeFlags("Results Themes", 0))
                 {
