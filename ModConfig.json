@@ -3,7 +3,7 @@
   "ModName": "Battle Music Randomizer",
   "ModAuthor": "YveltalGriffin",
   "ModVersion": "2.0.0",
-  "ModDescription": "A mod that randomizes battle and victory themes during gameplay",
+  "ModDescription": "A mod that randomizes battle and victory themes during gameplay.\n\nPress ALT in-game to open the mod's menu.",
   "ModDll": "p5rpc.music.battlemusicrandomizer.dll",
   "ModIcon": "Preview.png",
   "ModR2RManagedDll32": "x86/p5rpc.music.battlemusicrandomizer.dll",

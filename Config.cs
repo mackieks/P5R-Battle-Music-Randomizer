@@ -25,46 +25,11 @@ public class Config : Configurable<Config>
         The `DefaultValue` attribute is used as part of the `Reset` button in Reloaded-Launcher.
     */
 
-    [DisplayName("String")]
-    [Description("This is a string.")]
-    [DefaultValue("Default Name")]
-    public string String { get; set; } = "Default Name";
-    //Not Implemented
-    /*
-    [DisplayName("Ambush BGM Cue ID ")]
-    [Description("The Cue ID corresponding to the BGM track to play when engadging in normal enemy ambushes")]
-    [DefaultValue(300)]
-    public int AmbushBgmId { get; set; } = 300;
-    [DisplayName("Ambush BGM Cue ID ")]
-    [Description("The Cue ID corresponding to the BGM track to play when engadging in normal enemy ambushes")]
-    [DefaultValue(907)]
-    */
-    public int BattleBgmId { get; set; } = 907;
-
-    [DisplayName("Bool")]
-    [Description("This is a bool.")]
+    [DisplayName("Enable ImGui Menu")]
+    [Description("Set this to false if you experience crashes or controller issues. If set to false, you will have to edit p5rbgm.cfg in the mod folder to edit which songs you want to hear.")]
     [DefaultValue(true)]
-    public bool Boolean { get; set; } = true;
+    public bool menuEnable { get; set; } = true;
 
-    [DisplayName("Float")]
-    [Description("This is a floating point number.")]
-    [DefaultValue(6.987654F)]
-    public float Float { get; set; } = 6.987654F;
-
-    [DisplayName("Enum")]
-    [Description("This is an enumerable.")]
-    [DefaultValue(SampleEnum.ILoveIt)]
-    public SampleEnum Reloaded { get; set; } = SampleEnum.ILoveIt;
-
-    public enum SampleEnum
-    {
-        NoOpinion,
-        Sucks,
-        IsMediocre,
-        IsOk,
-        IsCool,
-        ILoveIt
-    }
 }
 
 /// <summary>

@@ -48,7 +48,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MedallionRandom" Version="1.1.0" />
     <PackageReference Include="Reloaded.Hooks" Version="4.2.1" />
     <PackageReference Include="Reloaded.Hooks.Definitions" Version="1.14.0" />
     <PackageReference Include="Reloaded.Imgui.Hook" Version="4.0.1" />

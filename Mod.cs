@@ -75,12 +75,16 @@ public class Mod : ModBase // <= Do not Remove.
     /// </summary>
     private readonly IModConfig _modConfig;
 
-    private IReverseWrapper<ambushBGMDelegate> _ambushBGMReverseWrapper;
-    private IReverseWrapper<battleBGMDelegate> _battleBGMReverseWrapper;
-    private IReverseWrapper<resultsBGMDelegate> _resultsBGMReverseWrapper;
+    
+
+    private static IReverseWrapper<ambushBGMDelegate> _ambushBGMReverseWrapper;
+    private static IReverseWrapper<battleBGMDelegate> _battleBGMReverseWrapper;
+    private static IReverseWrapper<resultsBGMDelegate> _resultsBGMReverseWrapper;
+    private static IReverseWrapper<resultsBGMDelegate2> _resultsBGMReverseWrapper2;
 
     private IAsmHook _battleBGMhook;
     private IAsmHook _resultsBGMhook;
+    private IAsmHook _resultsBGMhook2;
 
     private static bool[] ambushTracks = new bool[26];
     private static bool[] battleTracks = new bool[26];
@@ -243,14 +247,14 @@ public class Mod : ModBase // <= Do not Remove.
                     $"use64",
                     $"push rax\npush rcx\npush r8\npush r10",
                     $"sub rsp, 32",
-                    $"{_hooks.Utilities.GetAbsoluteCallMnemonics(resultsBGM, out _resultsBGMReverseWrapper)}",
+                    $"{_hooks.Utilities.GetAbsoluteCallMnemonics(resultsBGM, out _resultsBGMReverseWrapper2)}",
                     $"add rsp, 32",
                     $"pop r10\npop r8\npop rcx\npop rax",
                     $"mov r14, {num + 8}",
                     $"mov rcx, rsi",
                     $"jmp r14",
                 };
-                _resultsBGMhook = _hooks.CreateAsmHook(function, num, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
+                _resultsBGMhook2 = _hooks.CreateAsmHook(function, num, AsmHookBehaviour.DoNotExecuteOriginal).Activate();
 
                 _logger.Write($"Wrote hold-up results theme patch to memory!\n", _logger.ColorPinkLight);
             }
@@ -386,8 +390,15 @@ public class Mod : ModBase // <= Do not Remove.
         config["General"]["resultsTracks"].BoolValueArray = resultsTracks;
         config.SaveToFile(cfgLocation);
 
-
-        Start(_modLoader, _hooks, _logger);
+        if (_configuration.menuEnable)
+        {
+            _logger.Write($"ImGUI menu enabled in config.\n", _logger.ColorPinkLight);
+            Start(_modLoader, _hooks, _logger);
+        } else
+        {
+            _logger.Write($"ImGUI menu disabled in config! You must edit p5rbgm.cfg to select your songs.\n", _logger.ColorPinkLight);
+        }
+            
 
     }
 
@@ -449,19 +460,27 @@ public class Mod : ModBase // <= Do not Remove.
 
     public async void Start(IModLoaderV1 loader, IReloadedHooks hooks, ILogger _logger)
     {
-
+        //_logger.Write("Trying to get hook target.\n", _logger.ColorPinkLight);
         loader.GetController<IReloadedHooks>().TryGetTarget(out hooks);
+        //_logger.Write("Got hook target!\n", _logger.ColorPinkLight);
 
-        SDK.Init(hooks);
+        //_logger.Write("Trying to run SDK.init\n", _logger.ColorPinkLight);
+        SDK.Init(_hooks, s => { _logger.WriteLine(s, _logger.ColorPinkLight); });
+        //_logger.Write("Completed SDK.init.\n", _logger.ColorPinkLight);
+
         await ImguiHook.Create(RenderTestWindow, new ImguiHookOptions()
         {
-            EnableViewports = true,
+            EnableViewports = false,
             IgnoreWindowUnactivate = true,
             Implementations = new List<IImguiHook>()
                 {
                     new ImguiHookDx11()
                 }
-        }).ConfigureAwait(false);
+        }).ConfigureAwait(true);
+
+        //ImGuiIO IO = ImGui.GetIO();
+        //IO.ConfigFlags &= ~(int)ImGuiConfigFlags.NavEnableGamepad;
+
     }
 
     public unsafe void RenderTestWindow()
@@ -472,8 +491,7 @@ public class Mod : ModBase // <= Do not Remove.
         DearImguiSharp.ImGui.SetNextWindowSize(windowpos, 1 << 2);
         DearImguiSharp.ImGui.SetNextWindowBgAlpha(0.45f);
 
-        
-
+       
         var style = DearImguiSharp.ImGui.GetStyle();
         style.WindowRounding = 5.0f;
         style.FrameRounding = 2.0f;
@@ -502,13 +520,13 @@ public class Mod : ModBase // <= Do not Remove.
 
         style.Colors = colors;
 
-        if (DearImguiSharp.ImGui.GetIO().KeyAlt)
-            if( ( (Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000) ) - ms) > 250)
+        if (ImGui.GetIO().KeyAlt)
+            if (((Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000)) - ms) > 250)
             {
                 showWindow = !showWindow;
                 ms = Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000);
             }
-                
+
 
         if (showWindow)
         {
@@ -786,6 +804,9 @@ public class Mod : ModBase // <= Do not Remove.
 
     [Function(FunctionAttribute.Register.r10, FunctionAttribute.Register.rdx, false)]
     private delegate int resultsBGMDelegate();
+
+    [Function(FunctionAttribute.Register.r10, FunctionAttribute.Register.rdx, false)]
+    private delegate int resultsBGMDelegate2();
 
     #region Standard Overrides
     public override void ConfigurationUpdated(Config configuration)
